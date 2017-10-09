@@ -1,0 +1,143 @@
+---
+- hosts: r1x02
+  become: yes
+  roles:
+    - tests/ansible-apache
+    - tests/ansible-mongodb
+    - tests/ansible-java
+    - tests/ansible-elasticsearch
+    - ../ansible-graylog
+  vars:
+    ## APACHE ##
+    apache_mod_list:
+      - headers
+      - ssl
+      - rewrite
+      - proxy
+      - proxy_http
+    apache_mpm_list:
+      - worker
+    apache_use_lvm: true
+    apache_lv_size: 1g
+
+    ## JAVA ##
+    java_version: 8
+    install_jdk: 0
+    install_jre: 1
+    install_openjdk: 0
+
+    ## ELASTICSEARCH ##
+    es_version: "2.4.1"
+    es_lv_create: yes
+    es_lvsize: "2G"
+    es_lv_name: "lv_toto"
+    es_cluster_name: "graylog"
+    es_localhost_only: 1
+    es_heap_size: "2G"
+    es_max_locked_memory: "unlimited"
+    es_cluster_group: "r1x02"
+    es_firewall: False
+    #es_old_lock_memory: 0
+    es_unicast_hostlist:
+      - "unitest01g.bi10.local"
+
+    ## MONGODB ##
+    mongodb_major_version: "3.2"
+    mongodb_minor_version: "latest"
+    mongodb_engine: "wiredTiger"
+    mongodb_cluster: "false"
+    #mongodb_cluster: "true"
+    mongodb_bind_ip: 0.0.0.0
+    mongodb_cluster_name: "mongograylog"
+    mongodb_admin_password: "osef"
+    mongodb_backup_password: "osef"
+    mongodb_cluster_key: clusterkeyyyyy
+
+    ## GRAYLOG ##
+    ## A METTRE DANS LE ROLE GRAYLOG ##
+    ## XENIAL ##
+    java_bin: "/usr/lib/jvm/oracle-java8-jre-amd64/bin/java"
+    graylog_version: "2.1"
+    graylog_xms: "1G"
+    graylog_xmx: "1G"
+    graylog_apt_key: "http://mirror.services.local/pubkey/ael.scs.systeme.key"
+    graylog_apt_repo: "deb [arch=amd64] http://mirror.services.local/graylog_2.1/ trusty main"
+    graylog_mongodb_admin_password: "osef"
+    graylog_password_secret: "c4b1aGGc3OC6FzuYPzECSoFf2q3wWqN7cfmxDrVElzNDkvlnaFQhGvgOVII9ivDB9mjImFwqhHWsT7Tu9q61MRfCpiScHg5A"
+    graylog_root_password_sha2: "68bb07c845116797bd6038055d19c57a53d6aa9f027e5b02c7282644de46d756"
+    graylog_rest_listen_uri: "http://127.0.0.1:12900/"
+    graylog_web_listen_uri: "http://127.0.0.1:9000/"
+    graylog_elasticsearch_shards: "1"
+    graylog_elasticsearch_replicas: "0"
+    graylog_elasticsearch_cluster_name: "graylog"
+    graylog_elasticsearch_discovery_zen_ping_multicast_enabled: "false"
+    graylog_elasticsearch_discovery_zen_ping_unicast_hosts: "127.0.0.1:9300"
+    graylog_mongodb_user: "grayloguser"
+    graylog_mongodb_password: "osef"
+    graylog_mongodb_bdd: "graylog"
+    graylog_lvsize: "5G"
+    graylog_mongodb_uri: "{{ graylog_mongodb_user }}:{{ graylog_mongodb_password }}@localhost:27017/{{ graylog_mongodb_bdd }}"
+
+    ## OPTIONNEL ##
+    graylog_root_email: jlesaux.externe@pagesjaunes.fr
+    ## voir http://www.joda.org/joda-time/timezones.html ##
+    graylog_root_timezone: "Europe/Paris"
+
+    ## APACHE ##
+    graylog_apache_fqdn: "unitest19g.bi10.local"
+    graylog_rest_api_listen_port: "12900"
+    graylog_apache_server_cert: |
+      -----BEGIN CERTIFICATE-----
+      MIID8jCCAtqgAwIBAgICAIowDQYJKoZIhvcNAQENBQAwXjELMAkGA1UEBhMCRlIx
+      ETAPBgNVBAgMCEJyZXRhZ25lMRYwFAYDVQQKDA1Tb2xvY2FsIEdyb3VwMREwDwYD
+      VQQLDAhTeXN0ZW1lczERMA8GA1UEAwwISW5mcmEgQ0EwIBcNMTYwODIyMTUwOTMx
+      WhgPMjExNjA3MjkxNTA5MzFaMG0xCzAJBgNVBAYTAkZSMREwDwYDVQQIDAhCcmV0
+      YWduZTEWMBQGA1UECgwNU29sb2NhbCBHcm91cDERMA8GA1UECwwIU3lzdGVtZXMx
+      IDAeBgNVBAMMF2psc21vbmdvMDFsLmJ0c3lzLmxvY2FsMIIBIjANBgkqhkiG9w0B
+      AQEFAAOCAQ8AMIIBCgKCAQEAsxDkOG8EvO6SFVFL/3tZ1YacdZ2ZeepNh8JkcdaD
+      Fegd1y0aGKwMPnq1u8Sy+iLTQ+YSiEwLRKCRI8YJrvo3c3xjDR9naGoTkpXTBECA
+      s7oXntj+pXFBqSam0nlwyjUVP/J7P3qBrHJm0mO7tztBkjOxd4QhsPKYoybHoqlf
+      5vNsMStjWQO00HT/dJcjy2NsFJmEqFNrcllY7g8KxuOv82hEtedAzxLAhe+ZXOhD
+      ktlliTEqFEhGNY+2UvIYwbPt9bvqZnMj4coXNGsdg5LdoFWeUcSm/CARBo+9QscK
+      WhB8hBqJu7ZedqZa6dNenW2dJltr5+hu2EGZMZubaEEZvwIDAQABo4GoMIGlMAkG
+      A1UdEwQCMAAwHQYDVR0OBBYEFPavOSs8ETSOzb/FiyEhIdhczn/rMB8GA1UdIwQY
+      MBaAFLnOX8LmY7aXmZsoGzc6o9uB8HKZMDYGA1UdHwQvMC0wK6ApoCeGJWh0dHA6
+      Ly9jYS5zZXJ2aWNlcy5sb2NhbC9JbmZyYV9DQS5jcmwwCwYDVR0PBAQDAgXgMBMG
+      A1UdJQQMMAoGCCsGAQUFBwMBMA0GCSqGSIb3DQEBDQUAA4IBAQB8SA0cSPhnKjPw
+      9qc2nEUhopDWBhq6MJokqfu6V6k+50UMXrAeR78/kk5qbItcXNfYMSUAG4hWG+mj
+      rSpGm81oUXiffV+UyuRUypxfoEbsvPrdYFWYaF/Non4K3/+ARm8e+nae+7A+zl24
+      61cjqIVF8XFwiRusRIiaEC3kyS2R/yR5F+5BpKkPYm1ljLEHR73sSS9HTHNMaCNA
+      be+06O9HccZ4cQPN3UK9ZlkCGT3SpWYrfHFHumhHyjb2UX/nF4pkcMmwiZLk7YKF
+      BWF/LseeDFhSURUpP+O6wHbknjfaoQrAfJEkXdIKLq0xY0Q3cLc0JlF1AVnuJlY2
+      +yGeERbj
+      -----END CERTIFICATE-----
+
+    graylog_apache_server_key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCzEOQ4bwS87pIV
+      UUv/e1nVhpx1nZl56k2HwmRx1oMV6B3XLRoYrAw+erW7xLL6ItND5hKITAtEoJEj
+      xgmu+jdzfGMNH2doahOSldMEQICzuhee2P6lcUGpJqbSeXDKNRU/8ns/eoGscmbS
+      Y7u3O0GSM7F3hCGw8pijJseiqV/m82wxK2NZA7TQdP90lyPLY2wUmYSoU2tyWVju
+      DwrG46/zaES150DPEsCF75lc6EOS2WWJMSoUSEY1j7ZS8hjBs+31u+pmcyPhyhc0
+      ax2Dkt2gVZ5RxKb8IBEGj71CxwpaEHyEGom7tl52plrp016dbZ0mW2vn6G7YQZkx
+      m5toQRm/AgMBAAECggEBALAwWp48fkj35L0c9M44rLewb5o6q5yNsiN2Xia0jt6r
+      OVFTi23jO1junIpYjFIamg0g//Mj/6JS6vxsC3MjuBPlvABZegH+/aspyCtS3E/7
+      NuqRUF2xBo5M/a/y1cvgVzxIdoSLIbRwDEPO5hDwOSCFxIR4ej4FNbKyoZOnXDl8
+      fMwfFGOyYgVeY0bOJgSpX4AoJGiN2sfLHu6Mhq4mA24ElaSUZZTo9kyBmfd+D30v
+      JMRYK7bOTHxArqgWrZZV+D0DC5fttf5bPQNX/w2Qn5LLwm+ZNZiooEeuseLRqi6B
+      ZwwVaFGAUQKdtuxrsQv6xkZwruld/hHK17XX2pArnwECgYEA3blEXmpgmTr3isyi
+      0wkMeG6WNYmdRKYuQzKkvz5/Dv7MpmTS0HCoS/iORJb4wGc6XPd49b4QmyoGBaN2
+      q2CbC/gTIJy1y1LtLPgnfFCBpIT3WdstWoQkPZnRHjfX+Yj0zZ33EU2KY7nWDJlV
+      Wbs+O9yxVTYdv8zRj8j57qF68N8CgYEAzr9xH/Lhx2fRXNDKtPNAj3jR87pz4yiQ
+      4VJfLJqe1pTyf64ET+/VfS9jLeUTc+GMAGiysaIhnR/HtJ7h4LYGUye2UMV2d11k
+      Y5RUhDJSfCd4q7ubQ5GKoVKL/Wk28zdMCAbpsp5hc/gREu5UAsnnyNHm+5RQph77
+      cMSwaOvokyECgYBHkj1KiOYjsFAlwsawfpRC79eW8pQMi+QVFuztOtxC1+bxs0wF
+      ssfwtgwegelMGkZRqiSmlrK/k4IcIdb1nRqPc4WhGlTojB05TeVZEJe4pp89py1t
+      sYgNRnClY3tY9menU91j/Xa1mFBLAtf1PibppeSsT+qsdg4TbtmWuRN5WwKBgAMW
+      owb6JttGtr7vM4f+dkFuaZx9dYu4KGnlRByzdpn4AaNcox3alFLZaV7fJCo//Upo
+      RfsXU+838VDGatNjhLarSjLssDdaQsymA5kx8z99i3TtSYV54BtG02aGstZxRgZ8
+      q/MKIKSN2RtySfj8sSSz1gJ+FbJVliX6GjSHCaNhAoGAaL8mvqvnu5NMLmx9dqW8
+      reZ4D3ztUZrgXgMdumyKL9H7E8zjIWpEM/q8jyDHQDelG4qiqLWwoNKAf07Luwsa
+      Ogtm3Rn226cwCX+aNhiKk2Iwz+lp953Kufupcd2YLgysqLon7QG25BBj7vSGiSj1
+      wAEWTyDjyLiMOXs6YbnQk1M=
+      -----END PRIVATE KEY-----

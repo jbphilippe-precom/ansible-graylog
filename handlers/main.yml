@@ -1,0 +1,19 @@
+---
+# handlers file for ansible-graylog
+- name: restart graylog
+  become: yes
+  service:
+    name="{{ graylog_service_name }}"
+    state=restarted
+
+- name: restart es
+  become: yes
+  service:
+    name="elasticsearch"
+    state=restarted
+
+- name: restart apache2
+  become: yes
+  service:
+    name="apache2"
+    state=restarted

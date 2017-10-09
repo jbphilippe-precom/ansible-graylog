@@ -1,0 +1,20 @@
+---
+- include: graylog_set_repository.yml
+  become: yes
+
+- include: graylog_configure_lv.yml
+  become: yes
+  when: graylog_lv_create
+
+- include: graylog_install_package.yml
+  become: yes
+
+- include: graylog_configure.yml
+  become: yes
+
+- include: graylog_security.yml
+  become: yes
+  when: not graylog_cluster
+
+#- include: graylog_system_optimization.yml
+#  become: yes

@@ -1,0 +1,21 @@
+---
+## LV dédié  ##
+- name: "Adding lv_graylog"
+  lvol:
+    vg="{{ graylog_vg_root }}"
+    lv={{ graylog_lv_name }}
+    size="{{ graylog_lvsize }}"
+    state=present
+
+- name: "Creating FS ext4"
+  filesystem:
+    fstype=ext4
+    dev="/dev/mapper/{{ graylog_vg_root }}-{{ graylog_lv_name }}"
+
+- name: "Mounting /var/lib/graylog-server"
+  mount:
+    src="/dev/mapper/{{ graylog_vg_root }}-{{ graylog_lv_name }}"
+    name=/var/lib/graylog-server
+    fstype=ext4
+    opts=defaults,noatime,noexec
+    state=mounted

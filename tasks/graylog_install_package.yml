@@ -1,0 +1,30 @@
+---
+- name: PyMongo Package Key
+  apt_key:
+    url=http://aptrepo.services.local/systeme/pymongo/prod/systeme.gpg.pub
+    state=present
+
+- name: PyMongo APT repository
+  apt_repository:
+    repo='deb http://aptrepo.services.local/systeme/pymongo/prod {{ ansible_distribution_release }} main'
+    state=present
+
+- name: Install PyMongo
+  apt:
+    name=python-pymongo
+    state=latest
+
+- name: "Install Graylog"
+  apt:
+    name="graylog-server"
+    state=latest
+    update_cache=true
+  notify: "restart graylog"
+
+- name: Update owner for /var/lib/graylog-server dir
+  file:
+    path=/var/lib/graylog-server
+    state=directory
+    mode=0755
+    owner=graylog
+    group=graylog

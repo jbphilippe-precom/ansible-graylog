@@ -1,0 +1,98 @@
+---
+- name: "Check if java can bind to a port < 1024, ie: syslog 514"
+  shell: getcap {{ java_bin }} | grep cap_net_bind_service
+  register: java_bin_bind_cap
+  changed_when: False
+  failed_when: False
+
+- name: "Allow java to bind to a port < 1024, ie: syslog 514"
+  shell: setcap 'cap_net_bind_service=+ep' {{ java_bin }}
+  when: java_bin_bind_cap.rc > 0
+
+- name: Upload graylog.yml
+  template:
+    src="{{ graylog_config_template_file }}"
+    dest="{{ graylog_config_path }}"
+  notify: "restart graylog"
+
+- name: Upload default graylog file
+  template:
+    src="{{ graylog_default_config_template_file }}"
+    dest="{{ graylog_default_config_path }}"
+  register: graylog_upload_template
+
+- name: Create Graylog user
+  mongodb_user:
+    login_password={{ graylog_mongodb_admin_password }}
+    login_user=admin
+    login_host={{ graylog_mongodb_master_host }}
+    database={{ graylog_mongodb_bdd }}
+    name={{ graylog_mongodb_user }}
+    password={{ graylog_mongodb_password }}
+    roles='readWrite'
+    update_password=on_create
+    state=present
+  run_once: true
+
+- name: "upload certificate file"
+  copy:
+    content="{{ graylog_apache_server_cert }}"
+    dest="/etc/ssl/certs/{{ graylog_apache_fqdn }}.crt"
+    owner=root
+    group=root
+    mode=0644
+
+- name: "upload certificate key file"
+  copy:
+    content="{{ graylog_apache_server_key }}"
+    dest="/etc/ssl/private/{{ graylog_apache_fqdn }}.key"
+    owner=root
+    group=root
+    mode=0600
+
+- name: Upload default vhost file
+  template:
+    src="{{ graylog_default_vhost_template_file }}"
+    dest="{{ graylog_default_vhost_path }}"
+
+- name: Upload http vhost file
+  template:
+    src="{{ graylog_http_vhost_template_file }}"
+    dest="{{ graylog_vhost_dir }}/{{ graylog_apache_fqdn }}.conf"
+  notify: restart apache2
+
+- name: Upload https vhost file
+  template:
+    src="{{ graylog_https_vhost_template_file }}"
+    dest="{{ graylog_vhost_dir }}/{{ graylog_apache_fqdn }}-ssl.conf"
+  notify: restart apache2
+
+- name: "enable vhost http"
+  file:
+    src="{{ graylog_vhost_dir }}/{{ graylog_apache_fqdn }}.conf"
+    dest="{{ graylog_vhost_dir_enabled }}{{ graylog_apache_fqdn }}.conf"
+    state=link
+  notify: restart apache2
+
+- name: "enable vhost https"
+  file:
+    src="{{ graylog_vhost_dir }}/{{ graylog_apache_fqdn }}-ssl.conf"
+    dest="{{ graylog_vhost_dir_enabled }}{{ graylog_apache_fqdn }}-ssl.conf"
+    state=link
+  notify: restart apache2
+
+- name: Activate graylog at boot
+  file:
+    path="/etc/init/graylog-server.override"
+    state=absent
+
+- name: start graylog
+  service:
+    name="{{ graylog_service_name }}"
+    state=started
+
+- name: Template upload - Restart
+  service:
+    name="{{ graylog_service_name }}"
+    state=restarted
+  when: graylog_upload_template|changed

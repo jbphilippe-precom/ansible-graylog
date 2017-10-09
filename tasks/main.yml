@@ -1,0 +1,16 @@
+---
+# tasks file for ansible-graylog
+## INSTALLATION ##
+- include: graylog_install.yml
+  when: ansible_distribution == 'Ubuntu' and (ansible_distribution_release == 'trusty' or ansible_distribution_release == 'xenial')
+  tags: [installation]
+
+## ROLLBACK ##
+- include: graylog_rollback.yml
+  when: ansible_distribution == 'Ubuntu' and (ansible_distribution_release == 'trusty' or ansible_distribution_release == 'xenial')
+  tags: [rollback]
+
+## TESTING ##
+- include: graylog_testing.yml
+  when: ansible_distribution == 'Ubuntu' and (ansible_distribution_release == 'trusty' or ansible_distribution_release == 'xenial')
+  tags: [testing]

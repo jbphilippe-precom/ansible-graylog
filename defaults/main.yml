@@ -1,0 +1,59 @@
+---
+# defaults file for ansible-graylog
+## Package ##
+graylog_version: "2.1"
+graylog_apt_key: "http://mirror.services.local/pubkey/ael.scs.systeme.key"
+graylog_apt_repo: "deb [arch=amd64] http://mirror.services.local/graylog_2.1/ trusty main"
+
+## LV ##
+graylog_lv_name: "lv_graylog"
+graylog_vg_root: "vg_vroot"
+graylog_lvsize: "10G"
+graylog_lv_create: yes
+
+## JVM ##
+graylog_xms: "4G"
+graylog_xmx: "4G"
+graylog_extra_java_args: ""
+
+## Templates ##
+graylog_config_template_file: "server.conf"
+graylog_default_config_template_file: "default_graylog-server"
+graylog_master_node_mode: "true"
+
+
+## Configuration ##
+graylog_cluster: no
+## Example : pwgen -N 1 -s 96 #
+graylog_password_secret: "c4b1aGGc3OC6FzuYPzECSoFf2q3wWqN7cfmxDrVElzNDkvlnaFQhGvgOVII9ivDB9mjImFwqhHWsT7Tu9q61MRfCpiScHg5A"
+## Example : echo -n yourpassword | shasum -a 256 ##
+graylog_root_password_sha2: "68bb07c845116797bd6038055d19c57a53d6aa9f027e5b02c7282644de46d756"
+graylog_rest_listen_uri: "http://127.0.0.1:12900/"
+graylog_web_listen_uri: "http://127.0.0.1:9000/"
+
+graylog_elasticsearch_shards: "4"
+graylog_elasticsearch_replicas: "0"
+graylog_elasticsearch_max_number_of_indices: 20
+graylog_elasticsearch_max_docs_per_index: 20000000
+# It supports multiple rotation strategies:
+#   - "count" of messages per index, use elasticsearch_max_docs_per_index below to configure
+#   - "size" per index, use elasticsearch_max_size_per_index below to configure
+# valid values are "count", "size" and "time", default is "count"
+graylog_rotation_strategy: count
+graylog_elasticsearch_max_time_per_index: 1d
+graylog_elasticsearch_max_size_per_index: 1073741824
+graylog_elasticsearch_cluster_name: "graylog"
+graylog_elasticsearch_discovery_zen_ping_multicast_enabled: "false"
+graylog_elasticsearch_discovery_zen_ping_unicast_hosts: "127.0.0.1:9300"
+
+graylog_mongodb_user: "grayloguser"
+graylog_mongodb_password: "monpassword"
+graylog_mongodb_bdd: "graylog"
+graylog_mongodb_uri: "{{ graylog_mongodb_user }}:{{ graylog_mongodb_password }}@localhost:27017/{{ graylog_mongodb_bdd }}"
+graylog_mongodb_master_host: "localhost"
+
+graylog_rest_api_listen_port: "12900"
+
+graylog_root_timezone: "Europe/Paris"
+
+java_bin: "/usr/lib/jvm/jre-8-oracle-x64/bin/java"

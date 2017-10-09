@@ -1,0 +1,43 @@
+---
+- name: "Install Ufw"
+  apt:
+    name="ufw"
+    state=present
+    update_cache=true
+
+- name: "Allow everything and enable UFW"
+  ufw:
+    state=enabled
+    policy=allow
+
+- name: "Set logging"
+  ufw: logging=on
+
+- name: "Allow OpenSSH"
+  ufw:
+    rule=allow
+    name=OpenSSH
+
+- name: "Allow 127.0.0.1 on 9200"
+  ufw:
+    rule=allow
+    proto=tcp
+    port=9200
+    src=127.0.0.1
+
+- name: "Allow 127.0.0.1 on 9300"
+  ufw:
+    rule=allow
+    proto=tcp
+    port=9300
+    src=127.0.0.1
+
+- name: "Deny all access to port 9200"
+  ufw:
+    rule=reject
+    port=9200
+
+- name: "Deny all access to port 9300"
+  ufw:
+    rule=reject
+    port=9300
